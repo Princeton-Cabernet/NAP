@@ -1,0 +1,19 @@
+type key = { int<32> src_ip; int<32> dst_ip; int<32> src_port; int<32> dst_port; }
+type state = { int<32> fst; int<32> snd; }
+fun state init(pkt_type p) {
+    return {fst = p.hdr.tcp.seq_no; snd = 0}; }
+fun state upd(pkt_type p, state s ) {
+    return {fst = p.hdr.tcp.seq_no;
+            snd = s.snd + 1 if s.fst > p.hdr.tcp.seq_no else s.snd}; }
+global FoldSet.t<key> ooo = FoldSet.create(sub, since(sec(60)), Fold (init, upd, 1 ) );
+handle pkt_in(pkt_type p) {
+    int<32> num_ooo = 0;
+    match p.hdr.ipv4.protocol with 
+    | 6 -> {  num_ooo = FoldSet.add_query (ooo, 
+                                        { src_ip = p.hdr.ipv4.src_addr; 
+                                        dst_ip = p.hdr.ipv4.dst_addr;
+                                        src_port = p.hdr.tcp.src_port; 
+                                        dst_port = p.hdr.tcp.dst_port;} ); }
+    match num_ooo with 
+    | 1000 .. 4294967295 -> { p.ig_intr_tm_md.ucast_egress_port = 0x1; }
+}

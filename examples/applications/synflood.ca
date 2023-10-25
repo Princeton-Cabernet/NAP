@@ -1,0 +1,20 @@
+type key = { int<32> src_ip; }
+global CountSet.t<key> syn = CountSet.create(super, since(sec(60)), Count() );
+type state = { int<32> fst; }
+fun state init(pkt_type p) { return {fst = 0}; }
+fun state upd(pkt_type p, state s ) { return {fst = s.fst + 1}; }
+global FoldSet.t<key> ack = FoldSet.create(sub, since(sec(60)), Fold(init, upd, 0) );
+handle pkt_in(pkt_type p) {
+    int<32> num_syn = 0;
+    int<32> num_ack = 0;
+    int<32> num_unmatched = 0;
+    match p.hdr.tcp.flags with
+    | 0b*1****** -> 
+        { num_syn = CountSet.add_query(syn, { src_ip = p.hdr.ipv4.src_addr}); }
+    match p.hdr.tcp.flags with
+    | 0b*1**1*** -> 
+        { num_ack = FoldSet.add_query(ack, { src_ip = p.hdr.ipv4.src_addr}); }
+    num_unmatched = num_syn - num_ack;
+    match num_unmatched with 
+    | 1000 .. 4294967295 -> { p.ig_intr_tm_md.ucast_egress_port = 0x1; }
+}

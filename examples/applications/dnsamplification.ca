@@ -1,0 +1,15 @@
+type key = { int<32> int_ip; int<32> ext_ip; }
+global ExistSet.t<key> seen = ExistSet.create(super, within(sec(60), sec(120)), Exist() );
+handle pkt_in(pkt_type p) {
+    int<8> solicited = 1;
+    match p.hdr.tcp.dst_port, p.hdr.tcp.src_port with
+    | 53, _ -> { ExistSet.add(seen, 
+                            { ext_ip = p.hdr.ipv4.dst_addr; 
+                                int_ip = p.hdr.ipv4.src_addr}); }
+    | _, 53 -> { solicited = ExistSet.query(seen, 
+                                            { ext_ip = p.hdr.ipv4.src_addr; 
+                                            int_ip = p.hdr.ipv4.dst_addr }); }
+    match solicited with 
+    | 0 -> { p.ig_intr_dprsr_md.drop_ctl = 0x1; }
+    | _ -> { p.ig_intr_dprsr_md.drop_ctl = 0x0; }
+}

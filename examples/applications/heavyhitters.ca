@@ -1,0 +1,9 @@
+type key = { int<32> src_ip; }
+global CountSet.t<key> counter = CountSet.create(super, within(sec(60), sec(120)), Count() );
+handle pkt_in(pkt_type p) {
+    int<32> count = 0;
+    match p.ig_intr_md.ingress_port with
+    | 0 -> { count = CountSet.add_query(counter, { src_ip = p.hdr.ipv4.src_addr}); }
+    match count with 
+    | 1000 .. 4294967295 -> { p.ig_intr_tm_md.ucast_egress_port = 0x1; }
+}

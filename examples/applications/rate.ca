@@ -1,0 +1,12 @@
+type key = { int<8> src_ip_prefix; }
+type state = { int<32> fst; }
+fun state init(pkt_type p) { return {fst = 0}; }
+fun state upd(pkt_type p, state s ) { return {fst = s.fst + 1}; }
+global FoldSet.t<key> counter = FoldSet.create(exact, within(sec(60), sec(120)), Fold(init, upd, 0) );
+handle pkt_in(pkt_type p) {
+    int<32> count = 0;
+    int<8> src_ip_prefix = 0;
+    src_ip_prefix = p.hdr.ipv4.src_addr[0:7];
+    match p.ig_intr_md.ingress_port with
+    | _ -> { count = FoldSet.add_query(counter, { src_ip_prefix =src_ip_prefix}); }
+}

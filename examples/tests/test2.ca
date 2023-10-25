@@ -1,0 +1,11 @@
+int p.meta.num_ttl_change = 0;
+enum trivial (x) {
+  match () with
+  | -> {return All;}
+}
+p.meta.num_ttl_change = hs.where(trivial(p) == [All] && 
+                                 trivial(h) == [All] && 
+                                 p.[ip.srcIP] == h.[ip.srcIP])
+                          .within( 60 s, + )
+                          .fold([h.dns.ttl, 0], [h.dns.ttl, (f[0] != h.dns.ttl) ? f[1] + 1 : f[1]])[0];
+                          

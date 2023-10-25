@@ -1,0 +1,15 @@
+int p.meta.x = 0;
+int p.meta.y = 0;
+int p.meta.z = 0;
+enum dir (x) {
+  match (x.ipv6.srcIP, x.ipv6.dstIP) with
+  | _, 0 -> { return OUT; }
+  | 0, _ -> { return IN; }
+}
+p.meta.x = hs.where( dir(p) == IN &&
+                    dir(h) == OUT &&
+                    p.[ipv6.srcIP, ipv6.dstIP] == h.[ipv6.dstIP, ipv6.srcIP] )
+            .within( 60 s, + )
+            .exist( + );
+match (p.meta.x) with 
+| 1 -> { p.ig_intr_dprsr_md.drop_ctl = 0x1; }

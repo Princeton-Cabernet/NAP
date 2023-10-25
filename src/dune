@@ -1,0 +1,58 @@
+(include_subdirs unqualified)
+
+(library
+ (name nap)
+ (libraries batteries zarith ANSITerminal core ocamlgraph fileutils petr4)
+ (modules
+  cmdline
+  console
+  input
+  id
+  cid
+  taggedCid
+  integer
+  span
+  collections
+  memops
+  builtins
+  printing
+  lexer
+  parser
+  syntax
+  syntaxUtils
+  TQVar
+  miscUtils
+  setIR
+  setUtils
+  dagIR
+  dataflow
+  allocator
+  traverser
+  pipeline
+  dataStruct
+  dataStructIR
+  dataStructUtils
+  inputSpec
+  p4IR
+  catIR
+  transUtils
+  dataStructShared
+  bloom
+  countMinSketch
+  fold
+  translator
+  template)
+ (preprocess
+  (staged_pps
+   ppx_import
+   visitors.ppx
+   ppx_deriving.show
+   ppx_deriving.std
+   ppx_string)))
+
+(subdir
+ frontend
+ (menhir
+  (modules Parser))
+ (ocamllex
+  (modules Lexer)))

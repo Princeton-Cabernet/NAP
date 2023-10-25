@@ -1,0 +1,22 @@
+type key = { int<32> src_ip; }
+type state = { int<32> value; }
+fun state init(pkt_type p) {
+    return {value = p.hdr.ipv4.dst_addr}; }
+fun state upd(pkt_type p, state s ) {
+    return {value = p.hdr.ipv4.dst_addr}; }
+global FoldSet.t<key> ooo = FoldSet.create(sub, since(sec(60)), Fold (init, upd, 0 ) );
+global CountSet.t<key> counter = CountSet.create(super, within(sec(60), sec(120)), Count() );
+handle pkt_in(pkt_type p) {
+    int<32> num_quries = 0;
+    p.hdr.ipv4.dst_addr = 0;
+    match p.hdr.ipv4.protocol with
+    | 0 -> 
+        { CountSet.add(counter, { src_ip = p.hdr.ipv4.src_addr}); }
+    | 1 -> 
+        { num_quries = CountSet.query(counter, { src_ip = p.hdr.ipv4.src_addr}); }
+    match num_quries, p.hdr.ipv4.protocol with 
+    | 1000 .. 4294967295, 1 -> 
+        {  FoldSet.add(ooo, { src_ip = p.hdr.ipv4.src_addr}); }
+    | _, 0 -> 
+        { p.hdr.ipv4.dst_addr = FoldSet.query(ooo, { src_ip = p.hdr.ipv4.src_addr} ); }
+}

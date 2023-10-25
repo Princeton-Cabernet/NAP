@@ -1,0 +1,22 @@
+type key = { int<32> int_ip; int<32> ext_ip; }
+global ExistSet.t<key> seen = ExistSet.create(super, within(sec(60), sec(121)), Exist() );
+handle pkt_in(pkt_type p) {
+    int<8> solicited = 1;
+    match (p.hdr.ipv4.src_addr) with
+    | 0b1000000001110000**************** -> { ExistSet.add(seen, { ext_ip = p.hdr.ipv4.dst_addr; int_ip = p.hdr.ipv4.src_addr}); }
+    | 0b1000110010110100**************** -> { ExistSet.add(seen, { ext_ip = p.hdr.ipv4.dst_addr; int_ip = p.hdr.ipv4.src_addr}); }
+    | 0b11001100100110010011000********* -> { ExistSet.add(seen, { ext_ip = p.hdr.ipv4.dst_addr; int_ip = p.hdr.ipv4.src_addr}); }
+    | 0b010000101011010010110000******** -> { ExistSet.add(seen, { ext_ip = p.hdr.ipv4.dst_addr; int_ip = p.hdr.ipv4.src_addr}); }
+    | 0b010000101011010010110001******** -> { ExistSet.add(seen, { ext_ip = p.hdr.ipv4.dst_addr; int_ip = p.hdr.ipv4.src_addr}); }
+    | 0b0100001010110100101101********** -> { ExistSet.add(seen, { ext_ip = p.hdr.ipv4.dst_addr; int_ip = p.hdr.ipv4.src_addr}); }
+    | _ -> { solicited = ExistSet.query(seen, { ext_ip = p.hdr.ipv4.src_addr; int_ip = p.hdr.ipv4.dst_addr }); }
+    match solicited with 
+    | 0 -> { p.ig_intr_dprsr_md.drop_ctl = 0x0; 
+             p.ig_intr_tm_md.ucast_egress_port = 0x81;  
+             p.hdr.ethernet.src_addr = 0x1;  
+             p.hdr.ethernet.dst_addr = p.ig_intr_md.ingress_mac_tstamp; }
+    | _ -> { p.ig_intr_dprsr_md.drop_ctl = 0x0; 
+             p.ig_intr_tm_md.ucast_egress_port = 0x81;
+             p.hdr.ethernet.src_addr = 0x0;  
+             p.hdr.ethernet.dst_addr = p.ig_intr_md.ingress_mac_tstamp; } 
+}

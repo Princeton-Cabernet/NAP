@@ -1,2 +1,2 @@
 # NAP
-NAP: A Network Programming Language for Approximate Data Structures
+a network programming language for approximate data structures.

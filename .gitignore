@@ -1,0 +1,64 @@
+*.annot
+*.cmo
+*.cma
+*.cmi
+*.a
+*.o
+*.cmx
+*.cmxs
+*.cmxa
+
+# ocamlbuild working directory
+_build/
+
+# ocamlbuild targets
+*.byte
+*.native
+
+# oasis generated files
+setup.data
+setup.log
+
+# Merlin configuring file for Vim and Emacs
+.merlin
+
+# Dune generated files
+*.install
+
+# Local OPAM switch
+_opam/
+
+# Coq
+.*.aux
+.*.d
+*.glob
+*.ml.d
+*.ml4.d
+*.mli.d
+*.mllib.d
+*.mlpack.d
+*.native
+*.v.d
+*.vio
+*.vo
+*.vok
+*.vos
+.coq-native/
+.csdp.cache
+.lia.cache
+.nia.cache
+.nlia.cache
+.nra.cache
+csdp.cache
+lia.cache
+nia.cache
+nlia.cache
+nra.cache
+
+# OS
+.DS_Store
+
+# jupyter notebook
+.ipynb_checkpoints
+*/.ipynb_checkpoints/*
+*/__pycache__/*

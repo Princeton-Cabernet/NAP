@@ -1,0 +1,4 @@
+int p.meta.w = p.meta.z;
+int p.meta.c = p.meta.z;
+int p.meta.u = p.meta.z;
+int p.meta.z = 2;

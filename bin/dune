@@ -1,0 +1,5 @@
+(executables
+ (public_names nap)
+ (names main)
+ (libraries nap)
+ (link_flags -cc g++))

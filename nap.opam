@@ -1,0 +1,27 @@
+opam-version: "2.0"
+name: "NAP"
+version: "~dev"
+synopsis: "blah?"
+maintainer: "Mengying Pan <mengying@cs.princeton.edu>"
+authors: "Mengying Pan <mengying@cs.princeton.edu>"
+depends: [
+  "integers"
+  "batteries"
+  "ANSITerminal"
+  "menhir"
+  "zarith"
+  "visitors"
+  "ppx_deriving"
+  "ppx_string_interpolation"
+  "ppx_import"
+  "dune" { build }
+  "ocamlgraph"
+  "fileutils"
+  # "bignum"
+  # "coq" {build}
+]
+build: [
+  ["dune" "build" "-p" name "-j" jobs]
+  ["dune" "runtest" "-p" name "-f" "--no-buffer" "-j" jobs] {with-test}
+  ["dune" "build" "@doc" "-p" name "-j" jobs] {with-doc}
+]
